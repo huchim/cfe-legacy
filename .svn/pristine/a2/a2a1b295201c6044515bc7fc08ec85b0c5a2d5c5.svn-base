@@ -1,0 +1,10 @@
+﻿namespace Cfe.Security
+{
+    using System;
+
+    public class AccessEntry : IAccessEntry
+    {
+        public string Module { get; set; }
+        public string Privilege { get; set; }
+    }
+}

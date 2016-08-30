@@ -1,0 +1,115 @@
+﻿namespace Cfe.Security
+{
+    using System;
+    using System.Linq;
+
+    public class Controller
+    {
+        private bool IsInitialized = false;
+
+        public Controller()
+        {
+            this.Locations = new LocationManager();
+            this.Modules = new ModuleManager();
+            this.Privileges = new PrivilegeManager();
+            this.Roles = new RoleManager();
+            this.UserPrivilege = new UserPrivilegeManager();
+
+            this.IntEntriesQuery = "SELECT DISTINCT " + this.Modules.Table + ".Name AS Module, [" + this.Privileges.Table + "].Name AS Privilege FROM " + this.UserPrivilege.Table + " INNER JOIN " + this.Roles.Table + " ON " + this.UserPrivilege.Table + ".RoleId = " + this.Roles.Table + ".Id INNER JOIN [" + this.Privileges.Table + "] ON " + this.Roles.Table + ".Id = [" + this.Privileges.Table + "].RoleId INNER JOIN " + this.Modules.Table + " ON [" + this.Privileges.Table + "].ModuleId = " + this.Modules.Table + ".Id WHERE " + this.UserPrivilege.Table + ".UserId = {0} AND ( " + this.UserPrivilege.Table + ".Status <> -1 AND " + this.Roles.Table + ".Status <> -1 AND " + this.Modules.Table + ".Status <> -1 AND [" + this.Privileges.Table + "].Status <> -1)";
+           
+        }
+
+        public int UserId { get; set; }
+
+        public string EntriesQuery
+        {
+            set { this.IntEntriesQuery = value; }
+
+        }
+
+        public LocationManager Locations { get; set; }
+
+        public ModuleManager Modules { get; set; }
+
+        public PrivilegeManager Privileges { get; set; }
+
+        public RoleManager Roles { get; set; }
+
+        public UserPrivilegeManager UserPrivilege { get; set; }
+
+        internal string IntEntriesQuery { get; set; }
+
+        private System.Collections.Generic.List<AccessEntry> AccessEntries { get; set; }
+
+        public ILocation AddLocation(ILocation locationObject)
+        {
+            return (ILocation)this.Locations.Add(locationObject);
+        }
+
+        public IModule AddModule(IModule moduleObject)
+        {
+            return (IModule)this.Modules.Add(moduleObject);
+        }
+
+        public IModule AddModule(IModule moduleObject, IRole roleObject, string[] privilegeList)
+        {
+            IModule moduleObjectResult;
+
+            // En caso de que el módulo ya exista no lo agrego.
+            if (moduleObject.Id == 0)
+            {
+                moduleObjectResult = this.AddModule(moduleObject);
+            }
+            else
+            {
+                moduleObjectResult = moduleObject;
+            }
+
+            foreach (string privilege in privilegeList)
+            {
+                this.AddPrivilege(new Privilege() { Name = privilege, ModuleId = moduleObjectResult.Id, RoleId = roleObject.Id } );
+            }
+
+            return moduleObjectResult;
+        }
+
+        public IPrivilege AddPrivilege(IPrivilege privilegeObject)
+        {
+            return (IPrivilege)this.Privileges.Add(privilegeObject);
+        }
+
+        public bool Can(string privilegeName, string moduleName)
+        {
+            this.GetEntries();
+
+            return this.AccessEntries.Any(x => x.Module == moduleName && x.Privilege == privilegeName);
+        }
+
+        private void GetEntries()
+        {
+            if (this.IsInitialized)
+            {
+                return;
+            }
+            else
+            {
+                this.IsInitialized = true;
+            }
+
+            // Ejecuto la consulta.
+            System.Data.DataTable dt = Data.SqlClient.ExecuteQuery(string.Format(this.IntEntriesQuery, this.UserId));
+
+            // Revisar los resultados que devolvió la consulta.
+            this.AccessEntries = new System.Collections.Generic.List<AccessEntry>();
+
+            // En caso de que la consulta sea correcta, procedo a crear los resultados
+            foreach (System.Data.DataRow dr in dt.Rows)
+            {
+                this.AccessEntries.Add(new AccessEntry() {
+                    Module = dr["Module"].ToString(),
+                    Privilege = dr["Privilege"].ToString()
+                });
+            }
+        }
+    }
+}

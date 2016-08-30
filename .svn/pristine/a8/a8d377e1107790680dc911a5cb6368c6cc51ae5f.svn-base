@@ -1,0 +1,19 @@
+﻿namespace Cfe.Security.Models
+{
+    using System;
+
+    public class ModelBase : Util.IModelBase
+    {
+        public ModelBase()
+        {
+            this.Status = 0;
+            this.Creado = DateTime.Now;
+            this.Modificado = DateTime.Now;
+        }
+
+        public int Id { get; set; }
+        public int Status { get; set; }        
+        public DateTime Creado { get; set; }
+        public DateTime Modificado { get; set; }
+    }
+}

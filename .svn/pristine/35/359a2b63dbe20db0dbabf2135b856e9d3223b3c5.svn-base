@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8A2D060D-76F6-41E0-8712-2766983A73EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cfe</RootNamespace>
+    <AssemblyName>Cfe</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Reflection.Context" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\SqlClient.cs" />
+    <Compile Include="Security\AccessEntry.cs" />
+    <Compile Include="Security\Controller.cs" />
+    <Compile Include="Security\IAccessEntry.cs" />
+    <Compile Include="Security\UserPrivilegeManager.cs" />
+    <Compile Include="Security\UserPrivilege.cs" />
+    <Compile Include="Security\IUserPrivilege.cs" />
+    <Compile Include="Security\ILocation.cs" />
+    <Compile Include="Security\IModule.cs" />
+    <Compile Include="Security\InsertException.cs" />
+    <Compile Include="Security\IPrivilege.cs" />
+    <Compile Include="Security\IRole.cs" />
+    <Compile Include="Security\IUser.cs" />
+    <Compile Include="Security\Location.cs" />
+    <Compile Include="Security\LocationManager.cs" />
+    <Compile Include="Security\ManagerObject.cs" />
+    <Compile Include="Security\Session.cs" />
+    <Compile Include="Security\User.cs" />
+    <Compile Include="Util\IModelBase.cs" />
+    <Compile Include="Security\Models\ModelBase.cs" />
+    <Compile Include="Security\Module.cs" />
+    <Compile Include="Security\ModuleManager.cs" />
+    <Compile Include="Security\Privilege.cs" />
+    <Compile Include="Security\PrivilegeManager.cs" />
+    <Compile Include="Security\Role.cs" />
+    <Compile Include="Security\RoleManager.cs" />
+    <Compile Include="Text\Encoding.cs" />
+    <Compile Include="Web\Db\SqlClient.cs" />
+    <Compile Include="Web\Performance\Cache.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

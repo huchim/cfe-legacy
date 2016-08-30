@@ -1,0 +1,12 @@
+﻿namespace Cfe.Util
+{
+    using System;
+
+    public interface IModelBase
+    {
+        int Id { get; set; }        
+        int Status { get; set; }
+        DateTime Creado { get; set; }
+        DateTime Modificado { get; set; }
+    }
+}

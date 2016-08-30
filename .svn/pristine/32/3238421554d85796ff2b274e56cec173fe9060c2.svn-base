@@ -1,0 +1,155 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+
+namespace Cfe.Security
+{
+    public class Session
+    {
+        public Session()
+        {
+            if (HttpContext.Current.Session["token"] == null)
+            {
+                HttpContext.Current.Session["token"] = this.Encrypt(this.GetSeed()) as string;
+            }
+            else
+            {
+                this.SetupSession();
+            }
+        }
+
+
+        private void SetupSession()
+        {
+            if (!this.IsValid())
+            {
+                HttpContext.Current.Session["Id"] = 0;
+                return;
+            }
+        }
+
+        public string GetSeed()
+        {
+            return this.GetIp() + HttpContext.Current.Request.UserAgent;
+        }
+
+        public bool IsValid()
+        {
+            return this.Decrypt((HttpContext.Current.Session["token"] ?? string.Empty).ToString()) == this.GetSeed();
+        }
+
+        private string GetCustomSecurityKey()
+        {
+            return System.Configuration.ConfigurationManager.AppSettings["SecurityKey"] ?? "q\"w9!CjI(,<1~3x{";
+        }
+
+        public string Encrypt(string toEncrypt)
+        {
+            byte[] keyArray;
+            byte[] toEncryptArray = UTF8Encoding.UTF8.GetBytes(toEncrypt);
+
+            if (string.IsNullOrEmpty(toEncrypt))
+            {
+                return string.Empty;
+            }
+
+            keyArray = UTF8Encoding.UTF8.GetBytes(this.GetCustomSecurityKey());
+
+            TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider();
+
+            //set the secret key for the tripleDES algorithm
+            tdes.Key = keyArray;
+
+            //mode of operation. there are other 4 modes.
+            //We choose ECB(Electronic code Book)
+            tdes.Mode = CipherMode.ECB;
+
+            //padding mode(if any extra byte added)
+            tdes.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform cTransform = tdes.CreateEncryptor();
+
+            //transform the specified region of bytes array to resultArray
+            byte[] resultArray =
+              cTransform.TransformFinalBlock(toEncryptArray, 0,
+              toEncryptArray.Length);
+
+            //Release resources held by TripleDes Encryptor
+            tdes.Clear();
+
+            //Return the encrypted data into unreadable string format
+            return Convert.ToBase64String(resultArray, 0, resultArray.Length);
+        }
+
+        public string Decrypt(string cipherString)
+        {
+            if (string.IsNullOrEmpty(cipherString))
+            {
+                return string.Empty;
+            }
+
+            byte[] keyArray;
+
+            //get the byte code of the string
+            byte[] toEncryptArray = Convert.FromBase64String(cipherString);
+
+            //if hashing was not implemented get the byte code of the key
+            keyArray = UTF8Encoding.UTF8.GetBytes(this.GetCustomSecurityKey());
+
+            TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider();
+
+            //set the secret key for the tripleDES algorithm
+            tdes.Key = keyArray;
+
+            //mode of operation. there are other 4 modes. 
+            //We choose ECB(Electronic code Book)
+            tdes.Mode = CipherMode.ECB;
+
+            //padding mode(if any extra byte added)
+            tdes.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform cTransform = tdes.CreateDecryptor();
+            byte[] resultArray = cTransform.TransformFinalBlock(
+                                 toEncryptArray, 0, toEncryptArray.Length);
+            
+            //Release resources held by TripleDes Encryptor                
+            tdes.Clear();
+            
+            //return the Clear decrypted TEXT
+            return UTF8Encoding.UTF8.GetString(resultArray);
+        }
+
+        public string GetIp()
+        {
+            string ip = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ip))
+            {
+                string[] ipRange = ip.Split(',');
+                int le = ipRange.Length - 1;
+                string trueIP = ipRange[le];
+            }
+            else
+            {
+                ip = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"] ?? string.Empty;
+            }
+
+            return ip;
+        }
+
+        public bool AllowMultipleLogin { get; set; }
+
+        public int UserId { 
+            get {
+                return Convert.ToInt32((HttpContext.Current.Session["Id"] ?? 0));
+            } 
+            set {        
+                HttpContext.Current.Session["Id"] = value;
+            } 
+        }
+    }
+}
